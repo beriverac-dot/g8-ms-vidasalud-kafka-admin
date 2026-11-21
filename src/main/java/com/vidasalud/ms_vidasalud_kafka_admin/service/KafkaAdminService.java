@@ -1,6 +1,8 @@
 ﻿package com.vidasalud.ms_vidasalud_kafka_admin.service;
 
+import com.vidasalud.ms_vidasalud_kafka_admin.dto.ConsumerGroupDTO;
 import com.vidasalud.ms_vidasalud_kafka_admin.dto.TopicConfigUpdateDTO;
+import com.vidasalud.ms_vidasalud_kafka_admin.dto.TopicInfoDTO;
 import com.vidasalud.ms_vidasalud_kafka_admin.dto.TopicRequestDTO;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.config.ConfigResource;
@@ -40,7 +42,7 @@ public class KafkaAdminService {
         }
     }
 
-    public List> listTopics() throws ExecutionException, InterruptedException {
+    public List<TopicInfoDTO> listTopics() throws ExecutionException, InterruptedException {
         try (AdminClient client = createClient()) {
             Set<String> names = client.listTopics().names().get();
             if (names.isEmpty()) return Collections.emptyList();
@@ -51,21 +53,25 @@ public class KafkaAdminService {
                     .toList();
             Map<ConfigResource, Config> configs = client.describeConfigs(resources).all().get();
 
-            List> result = new ArrayList<>();
+            List<TopicInfoDTO> result = new ArrayList<>();
             for (String name : names) {
                 TopicDescription desc = descriptions.get(name);
                 Config cfg = configs.get(new ConfigResource(ConfigResource.Type.TOPIC, name));
-                Map<String, Object> info = new LinkedHashMap<>();
-                info.put("name", name);
-                info.put("partitions", desc.partitions().size());
-                info.put("replicationFactor", desc.partitions().isEmpty() ? 0 : desc.partitions().get(0).replicas().size());
+                String retentionVal = "default";
+                String cleanupVal = "default";
                 if (cfg != null) {
                     ConfigEntry retention = cfg.get(TopicConfig.RETENTION_MS_CONFIG);
                     ConfigEntry cleanup = cfg.get(TopicConfig.CLEANUP_POLICY_CONFIG);
-                    info.put("retention.ms", retention != null ? retention.value() : "default");
-                    info.put("cleanup.policy", cleanup != null ? cleanup.value() : "default");
+                    if (retention != null) retentionVal = retention.value();
+                    if (cleanup != null) cleanupVal = cleanup.value();
                 }
-                result.add(info);
+                result.add(TopicInfoDTO.builder()
+                        .name(name)
+                        .partitions(desc.partitions().size())
+                        .replicationFactor(desc.partitions().isEmpty() ? 0 : desc.partitions().get(0).replicas().size())
+                        .retentionMs(retentionVal)
+                        .cleanupPolicy(cleanupVal)
+                        .build());
             }
             return result;
         }
@@ -97,21 +103,21 @@ public class KafkaAdminService {
         }
     }
 
-    public List> listConsumerGroups() throws ExecutionException, InterruptedException {
+    public List<ConsumerGroupDTO> listConsumerGroups() throws ExecutionException, InterruptedException {
         try (AdminClient client = createClient()) {
             Collection<ConsumerGroupListing> listings = client.listConsumerGroups().all().get();
             List<String> groupIds = listings.stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList());
             if (groupIds.isEmpty()) return Collections.emptyList();
 
             Map<String, ConsumerGroupDescription> descriptions = client.describeConsumerGroups(groupIds).all().get();
-            List> groups = new ArrayList<>();
+            List<ConsumerGroupDTO> groups = new ArrayList<>();
             for (ConsumerGroupDescription desc : descriptions.values()) {
-                Map<String, Object> item = new LinkedHashMap<>();
-                item.put("groupId", desc.groupId());
-                item.put("state", desc.state().toString());
-                item.put("memberCount", desc.members().size());
-                item.put("coordinator", desc.coordinator() != null ? desc.coordinator().host() : "N/A");
-                groups.add(item);
+                groups.add(ConsumerGroupDTO.builder()
+                        .groupId(desc.groupId())
+                        .state(desc.state().toString())
+                        .memberCount(desc.members().size())
+                        .coordinator(desc.coordinator() != null ? desc.coordinator().host() : "N/A")
+                        .build());
             }
             return groups;
         }

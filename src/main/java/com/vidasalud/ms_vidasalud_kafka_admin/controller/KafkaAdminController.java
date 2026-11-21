@@ -1,6 +1,8 @@
 ﻿package com.vidasalud.ms_vidasalud_kafka_admin.controller;
 
+import com.vidasalud.ms_vidasalud_kafka_admin.dto.ConsumerGroupDTO;
 import com.vidasalud.ms_vidasalud_kafka_admin.dto.TopicConfigUpdateDTO;
+import com.vidasalud.ms_vidasalud_kafka_admin.dto.TopicInfoDTO;
 import com.vidasalud.ms_vidasalud_kafka_admin.dto.TopicRequestDTO;
 import com.vidasalud.ms_vidasalud_kafka_admin.service.KafkaAdminService;
 import jakarta.validation.Valid;
@@ -8,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/kafka")
@@ -21,7 +22,7 @@ public class KafkaAdminController {
     }
 
     @GetMapping("/topics")
-    public ResponseEntity<List>> listTopics() throws Exception {
+    public ResponseEntity<List<TopicInfoDTO>> listTopics() throws Exception {
         return ResponseEntity.ok(kafkaAdminService.listTopics());
     }
 
@@ -44,7 +45,7 @@ public class KafkaAdminController {
     }
 
     @GetMapping("/consumer-groups")
-    public ResponseEntity<List>> listConsumerGroups() throws Exception {
+    public ResponseEntity<List<ConsumerGroupDTO>> listConsumerGroups() throws Exception {
         return ResponseEntity.ok(kafkaAdminService.listConsumerGroups());
     }
 }
