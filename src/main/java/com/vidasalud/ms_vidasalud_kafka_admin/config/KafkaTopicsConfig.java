@@ -1,4 +1,4 @@
-﻿package com.vidasalud.ms_vidasalud_kafka_admin.config;
+package com.vidasalud.ms_vidasalud_kafka_admin.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.config.TopicConfig;

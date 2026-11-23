@@ -1,4 +1,4 @@
-﻿package com.vidasalud.ms_vidasalud_kafka_admin.dto;
+package com.vidasalud.ms_vidasalud_kafka_admin.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

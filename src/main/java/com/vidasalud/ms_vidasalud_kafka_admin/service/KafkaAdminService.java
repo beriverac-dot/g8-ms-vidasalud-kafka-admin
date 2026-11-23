@@ -1,4 +1,4 @@
-﻿package com.vidasalud.ms_vidasalud_kafka_admin.service;
+package com.vidasalud.ms_vidasalud_kafka_admin.service;
 
 import com.vidasalud.ms_vidasalud_kafka_admin.dto.ConsumerGroupDTO;
 import com.vidasalud.ms_vidasalud_kafka_admin.dto.TopicConfigUpdateDTO;
